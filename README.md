@@ -1,9 +1,6 @@
-# GWAS Nextflow Demo
-
+# GWAS with Nextflow and docker
 This repository contains a **minimal reproducible workflow** for performing a **Genome-Wide Association Study (GWAS)** using [Nextflow](https://www.nextflow.io/) and Docker.  
 It uses a **mini simulated dataset** so that the workflow can be tested quickly without requiring large genomic data.
-
----
 
 ## 1. What is GWAS?
 
@@ -46,16 +43,8 @@ This demo workflow implements a simplified GWAS pipeline:
 ---
 
 ## 3. Repository Structure
-gwas-nextflow-demo/
-├── data/
-│ ├── genotype.bed # Genotype binary file
-│ ├── genotype.bim # SNP information
-│ ├── genotype.fam # Individual information
-│ └── phenotype.txt # Phenotype data
-├── Dockerfile # Environment with PLINK + R
-├── main.nf # Nextflow workflow
-├── nextflow.config # Config (Docker support)
-└── README.md # This file
+
+<img width="389" height="202" alt="Screenshot 2025-09-16 at 16 11 51" src="https://github.com/user-attachments/assets/e2c683c4-c123-4bce-9d0a-7a4ad74289a2" />
 
 
 ---
@@ -69,48 +58,26 @@ gwas-nextflow-demo/
 
 ## 5. Build Docker Image
 
-```bash
-docker build -t gwas-demo:latest .
+     docker build -t gwas-demo:latest . 
 
+--- 
+## 6. Run the Workflow 
+      nextflow run main.nf --outdir "./my_results" -with-docker gwas-demo:latest
+--- 
+## 7. References
+- Purcell S, et al. (2007) PLINK: A tool set for whole-genome association and population-based linkage analyses.
+- Tutorial on GWAS: https://www.ebi.ac.uk/training/online/courses/gwas-tutorial/
+- Nextflow documentation: https://www.nextflow.io/docs/latest/index.html
+- Ensembl VEP: https://www.ensembl.org/info/docs/tools/vep/index.html
 
-## 6. Run the Workflow
-nextflow run main.nf -with-docker gwas-demo:latest
-
-## 7. Output Files
-
-gwas_results.assoc → Raw GWAS association results from PLINK
-
-manhattan.png → A simple Manhattan plot generated from the results
-
-## 8. Example Manhattan Plot
-
-(For illustration, real output will depend on the simulated dataset)
-
-## 9. Notes
-
-This is a minimal demo, not a production-ready GWAS pipeline.
-
-For real GWAS projects:
-
-Perform extensive QC (SNP/individual filters).
-
-Use covariates (age, sex, population structure).
-
-Consider mixed models (e.g., GEMMA, GCTA).
-
-## 10. Workflow Diagram
-
+## Workflow Diagram
 ```mermaid
 flowchart TD
-    A[Genotype + Phenotype Data] --> B[Association Testing (PLINK)]
-    B --> C[Manhattan Plot Visualization (R)]
+    A[Simulate Genotype and Phenotype] --> B[QC Genotype]
+    B --> C[Association Testing - PLINK2]
+    C --> D[Manhattan Plot Visualization]
+    C --> E[Filter SNPs of Interest]
+    E --> F[Variant Annotation - VEP]
 
 
----
-##11. References
 
-Purcell S, et al. (2007) PLINK: A tool set for whole-genome association and population-based linkage analyses.
-
-Tutorial on GWAS: https://www.ebi.ac.uk/training/online/courses/gwas-tutorial/
-
-Nextflow documentation: https://www.nextflow.io/docs/latest/index.html
