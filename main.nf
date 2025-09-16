@@ -1,7 +1,7 @@
 nextflow.enable.dsl=2
 
 params.outdir = "./results"
-params.p_threshold = 5e-8 // Ngưỡng p-value để lọc SNP of interest (có thể điều chỉnh)
+params.p_threshold = 5e-8 // P-value threshold to filter SNPs of interest (adjustable)
 
 // ----------------------------
 // Simulate genotype
@@ -19,7 +19,7 @@ process simulate_genotype {
 }
 
 // ----------------------------
-// QC genotype
+// Genotype QC
 // ----------------------------
 process qc_genotype {
     publishDir "${params.outdir}/qc", mode: 'copy'
@@ -37,7 +37,7 @@ process qc_genotype {
 }
 
 // ----------------------------
-// Assoc test
+// Association test
 // ----------------------------
 process assoc_test {
     publishDir "${params.outdir}/assoc", mode: 'copy'
@@ -102,7 +102,7 @@ EOF
 }
 
 // ----------------------------
-// Filter SNP of interest
+// Filter SNPs of interest
 // ----------------------------
 process filter_snp_of_interest {
     publishDir "${params.outdir}/snp_of_interest", mode: 'copy'
@@ -115,7 +115,7 @@ process filter_snp_of_interest {
 
     script:
     """
-    # Lọc SNP dựa trên ngưỡng p-value
+    # Filter SNPs based on p-value threshold
     awk -v threshold=${params.p_threshold} 'NR>1 && \$15<threshold {print \$0}' ${glm_files} > snp_of_interest.txt
     """
 }
@@ -135,16 +135,16 @@ process run_vep {
 
     script:
     """
-    # Kiểm tra file input
+    # Check input file
     if [ ! -s ${snp_file} ]; then
         echo "Error: ${snp_file} is empty or does not exist" >&2
         exit 1
     fi
 
-    # Sao chép file input
+    # Copy input file
     cp ${snp_file} temp.txt
 
-    # Chạy VEP online với --database
+    # Run VEP online with --database
     vep --input_file temp.txt \
         --output_file vep_output.txt \
         --species homo_sapiens \
@@ -155,8 +155,9 @@ process run_vep {
     """
 }
 
-
-
+// ----------------------------
+// Workflow
+// ----------------------------
 workflow {
     geno_ch = simulate_genotype()
     qc_ch   = qc_genotype(geno_ch)
